@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <getopt.h>
+#include <ctype.h>
 #include <errno.h>
 #include <termios.h>
 #include <stdlib.h>
@@ -35,6 +37,11 @@
 #include <sml/sml_value.h>
 
 #include "unit.h"
+
+// globals
+int sflag = false; // flag to process only a single OBIS data stream
+int vflag = false; // verbose flag
+
 
 int serial_port_open(const char* device) {
 	int bits;
@@ -85,10 +92,12 @@ void transport_receiver(unsigned char *buffer, size_t buffer_len) {
 	// the sml file is parsed now
 
 	// this prints some information about the file
-	sml_file_print(file);
+	if (vflag)
+		sml_file_print(file);
 
 	// read here some values ...
-	printf("OBIS data\n");
+	if (vflag)
+		printf("OBIS data\n");
 	for (i = 0; i < file->messages_len; i++) {
 		sml_message *message = file->messages[i];
 		if (*message->message_body->tag == SML_MESSAGE_GET_LIST_RESPONSE) {
@@ -132,6 +141,8 @@ void transport_receiver(unsigned char *buffer, size_t buffer_len) {
 					fflush(stdout);
 				}
 			}
+			if (sflag)
+				exit(0); // processed first message - exit
 		}
 	}
 
@@ -142,17 +153,44 @@ void transport_receiver(unsigned char *buffer, size_t buffer_len) {
 int main(int argc, char *argv[]) {
 	// this example assumes that a EDL21 meter sending SML messages via a
 	// serial device. Adjust as needed.
-	if (argc != 2) {
-		printf("Usage: %s <device>\n", argv[0]);
-		printf("device - serial device of connected power meter e.g. /dev/cu.usbserial, or - for stdin\n");
+	int c;
+
+	while ((c = getopt(argc, argv, "+hsv")) != -1) {
+		switch (c) {
+		case 'h':
+			printf("usage: %s [-h] [-s] [-v] device\n", argv[0]);
+			printf("device - serial device of connected power meter e.g. /dev/cu.usbserial, or - for stdin\n");
+			printf("-h - help\n");
+			printf("-s - process only one OBIS data stream (single)\n");
+			printf("-v - verbose\n");
+			exit(0); // exit here
+			break;
+		case 's':
+			sflag = true;
+			break;
+		case 'v':
+			vflag = true;
+			break;
+		case '?':
+			// get a not specified switch, error message is printed by getopt()
+			printf("Use %s -h for help.\n", argv[0]);
+			exit(1); // exit here
+			break;
+		default:
+			break;
+		}
+	}
+
+	if (argc - optind != 1) {
+		printf("error: Arguments mismatch.\nUse %s -h for help.\n", argv[0]);
 		exit(1); // exit here
 	}
 
 	// open serial port
-	int fd = serial_port_open(argv[1]);
+	int fd = serial_port_open(argv[optind]);
 	if (fd < 0) {
-		printf("Error: failed to open device (%s)\n", argv[1]);
-		exit(3);
+		// error message is printed by serial_port_open()
+		exit(1);
 	}
 
 	// listen on the serial device, this call is blocking.
