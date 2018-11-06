@@ -26,7 +26,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>  // for errno
-#include <string.h> // for strerror_r
 
 #define MC_SML_BUFFER_LEN 8096
 
