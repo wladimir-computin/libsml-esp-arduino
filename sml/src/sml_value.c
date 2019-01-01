@@ -23,7 +23,7 @@
 
 sml_value *sml_value_parse(sml_buffer *buf) {
 	if (sml_buf_optional_is_skipped(buf)) {
-		return 0;
+		return NULL;
 	}
 
 	int max = 1;
@@ -56,7 +56,7 @@ sml_value *sml_value_parse(sml_buffer *buf) {
 	}
 	if (sml_buf_has_errors(buf)) {
 		sml_value_free(value);
-		return 0;
+		return NULL;
 	}
 
 	return value;
@@ -122,7 +122,7 @@ double sml_value_to_double(sml_value *value) {
 		case 0x68: return *value->data.uint64; break;
 
 		default:
-			fprintf(stderr, "libsml: error: unknown type %d in %s\n", value->type, __FUNCTION__);
+			fprintf(stderr, "libsml: error: unknown type %d in %s\n", value->type, __func__);
 			return 0;
 	}
 }
