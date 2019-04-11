@@ -121,7 +121,7 @@ void sml_list_add(sml_list *list, sml_list *new_entry) {
 }
 
 struct workarounds {
-	u8 dzg_meter:1;
+	unsigned int dzg_meter : 1;
 };
 
 sml_list *sml_list_entry_parse(sml_buffer *buf, struct workarounds *workarounds) {
