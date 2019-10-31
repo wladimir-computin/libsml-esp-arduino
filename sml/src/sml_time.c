@@ -38,18 +38,29 @@ sml_time *sml_time_parse(sml_buffer *buf) {
 
 	sml_time *tme = sml_time_init();
 
-	if (sml_buf_get_next_type(buf) != SML_TYPE_LIST) {
-		buf->error = 1;
-		goto error;
-	}
+    // workaround Holley DTZ541
+    // if SML_ListEntry valTime (SML_Time) is given there are missing bytes:
+    // 0x72: indicate a list for SML_Time with 2 entries
+    // 0x62 0x01: indicate secIndex
+    // instead, the DTZ541 starts with 0x65 + 4 bytes secIndex
+    // the workaround will add this information during parsing
+    if (sml_buf_get_current_byte(buf) == (SML_TYPE_UNSIGNED | 5)) {
+        tme->tag = malloc(sizeof(u8));
+        *(tme->tag) = SML_TIME_SEC_INDEX;
+    } else {
+        if (sml_buf_get_next_type(buf) != SML_TYPE_LIST) {
+            buf->error = 1;
+            goto error;
+        }
 
-	if (sml_buf_get_next_length(buf) != 2) {
-		buf->error = 1;
-		goto error;
-	}
+		if (sml_buf_get_next_length(buf) != 2) {
+			buf->error = 1;
+			goto error;
+		}
 
-	tme->tag = sml_u8_parse(buf);
-	if (sml_buf_has_errors(buf)) goto error;
+		tme->tag = sml_u8_parse(buf);
+		if (sml_buf_has_errors(buf)) goto error;
+    }
 
 	int type = sml_buf_get_next_type(buf);
 	switch (type) {
