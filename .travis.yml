@@ -2,15 +2,30 @@ language: c
 
 sudo: false
 
-compiler:
-  - clang
-  - gcc
-
 addons:
   apt:
+    sources:
+    - llvm-toolchain-trusty
     packages:
-      - uuid-dev
-      - uuid-runtime
+    - clang-format-9
+    - uuid-dev
+    - uuid-runtime
+
+before_script:
+- clang-format --version
+
+matrix:
+  include:
+  - env: BUILD=1
+    compiler: clang
+  - env: BUILD=1
+    compiler: gcc
+  - env: FORMAT=1
 
 script:
-  - make
+- if [ -n "$BUILD" ]; then make; fi
+- |
+  if [ -n "$FORMAT" ]; then
+    clang-format -i sml/include/sml/* sml/src/*
+    test -z "$(git status --porcelain)" || (git status; git diff; false)
+  fi
