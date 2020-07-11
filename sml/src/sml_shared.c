@@ -22,6 +22,12 @@
 
 int sml_buf_get_next_length(sml_buffer *buf) {
 	int length = 0;
+
+	// current byte available?
+	if ((buf->cursor + 1) > buf->buffer_len) {
+		buf->error = 1;
+		return -1;
+	}
 	unsigned char byte = sml_buf_get_current_byte(buf);
 	int list = ((byte & SML_TYPE_FIELD) == SML_TYPE_LIST) ? 0 : -1;
 
