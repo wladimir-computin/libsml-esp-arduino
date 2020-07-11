@@ -144,7 +144,7 @@ sml_message_body *sml_message_body_parse(sml_buffer *buf) {
 	}
 
 	msg_body->tag = sml_u32_parse(buf);
-	if (sml_buf_has_errors(buf))
+	if (sml_buf_has_errors(buf) || msg_body->tag == NULL)
 		goto error;
 
 	switch (*(msg_body->tag)) {
