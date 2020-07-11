@@ -138,6 +138,11 @@ sml_message_body *sml_message_body_parse(sml_buffer *buf) {
 	sml_message_body *msg_body = (sml_message_body *)malloc(sizeof(sml_message_body));
 	*msg_body = (sml_message_body){.tag = NULL, .data = NULL};
 
+	if ((buf->cursor + 1) > buf->buffer_len) {
+		buf->error = 1;
+		goto error;
+	}
+
 	if (sml_buf_get_next_type(buf) != SML_TYPE_LIST) {
 		buf->error = 1;
 		goto error;

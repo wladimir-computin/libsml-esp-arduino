@@ -93,6 +93,13 @@ void *sml_number_parse(sml_buffer *buf, unsigned char type, int max_size) {
 	unsigned char *np = malloc(max_size);
 	memset(np, 0, max_size);
 
+	// at least l bytes available?
+	if ((buf->cursor + l) > buf->buffer_len) {
+		buf->error = 1;
+		free(np);
+		return NULL;
+	}
+
 	b = sml_buf_get_current_byte(buf);
 	if (type == SML_TYPE_INTEGER && (b & 128)) {
 		negative_int = 1;
