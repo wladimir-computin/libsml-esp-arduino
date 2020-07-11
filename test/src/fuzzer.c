@@ -27,7 +27,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 }
 
 // compile with:
-// clang -g -O1 -L./sml/lib -fsanitize=fuzzer test/src/fuzzer.c -lsml -luuid
+// clang -g -O1 -L./sml/lib -fsanitize=fuzzer,address test/src/fuzzer.c -lsml -luuid
 
 // run with:
 // mkdir corpus_dir
