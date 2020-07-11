@@ -66,6 +66,11 @@ sml_message *sml_message_parse(sml_buffer *buf) {
 		goto error;
 
 	len = buf->cursor - msg_start;
+	if ((buf->buffer_len - buf->cursor) < 2) {
+		// libFuzzer ASAN found read out of bound.
+		// at least the 2 bytes for the crc there?
+		goto error;
+	}
 
 	msg->crc = sml_u16_parse(buf);
 	if (sml_buf_has_errors(buf) || !(msg->crc))
