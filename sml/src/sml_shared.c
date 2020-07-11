@@ -38,7 +38,12 @@ int sml_buf_get_next_length(sml_buffer *buf) {
 			list += -1;
 		}
 	}
-	sml_buf_update_bytes_read(buf, 1);
+	if (buf->cursor < buf->buffer_len) {
+		sml_buf_update_bytes_read(buf, 1);
+	} else {
+		buf->error = 1;
+		return -1;
+	}
 
 	return length + list;
 }
