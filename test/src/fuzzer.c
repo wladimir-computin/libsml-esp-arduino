@@ -1,4 +1,4 @@
-// Copyright 2020 Matthias Bher
+// Copyright 2020 Matthias Behr
 //
 // This file is part of libSML.
 //
@@ -18,7 +18,10 @@
 #include <sml/sml_file.h>
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
-	sml_file *file = sml_file_parse((unsigned char *)data, size);
+	// we shift by 8 to be able to use libsml-testing bin files inside
+	// corpus dir
+	sml_file *file = sml_file_parse(size > 8 ? ((unsigned char *)data) + 8 : (unsigned char *)data,
+									size > 8 ? (size - 8) : size);
 	sml_file_free(file);
 	return 0;
 }
@@ -28,6 +31,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
 // run with:
 // mkdir corpus_dir
+// prefill corpus_dir e.g. with files libsml-testing
 // ./a.out corpus_dir
 // run until it stops with a crash file being generated
 // e.g. crash-...
