@@ -74,6 +74,11 @@ void *sml_number_parse(sml_buffer *buf, unsigned char type, int max_size) {
 	unsigned char b;
 	short negative_int = 0;
 
+	if ((buf->cursor + 1) > buf->buffer_len) { // at least 1 byte for type?
+		buf->error = 1;
+		return NULL;
+	}
+
 	if (sml_buf_get_next_type(buf) != type) {
 		buf->error = 1;
 		return NULL;
