@@ -68,7 +68,7 @@ sml_message *sml_message_parse(sml_buffer *buf) {
 	len = buf->cursor - msg_start;
 
 	msg->crc = sml_u16_parse(buf);
-	if (sml_buf_has_errors(buf))
+	if (sml_buf_has_errors(buf) || !(msg->crc))
 		goto error;
 
 	if (*msg->crc != sml_crc16_calculate(&(buf->buffer[msg_start]), len))
