@@ -154,6 +154,10 @@ sml_list *sml_list_entry_parse(sml_buffer *buf, struct workarounds *workarounds)
 	if (sml_buf_has_errors(buf))
 		goto error;
 
+	if (buf->cursor >= buf->buffer_len) {
+		goto error;
+	}
+
 	value_tl = sml_buf_get_current_byte(buf);
 	value_len_more = value_tl & (SML_ANOTHER_TL | SML_LENGTH_FIELD);
 	l->value = sml_value_parse(buf);
