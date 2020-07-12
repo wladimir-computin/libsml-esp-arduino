@@ -143,8 +143,11 @@ sml_tree *sml_tree_parse(sml_buffer *buf) {
 		int elems;
 		for (elems = sml_buf_get_next_length(buf); elems > 0; elems--) {
 			c = sml_tree_parse(buf);
-			if (sml_buf_has_errors(buf))
+			if (sml_buf_has_errors(buf)) {
+				if (c)
+					sml_tree_free(c);
 				goto error;
+			}
 			if (c) {
 				sml_tree_add_tree(tree, c);
 			}
