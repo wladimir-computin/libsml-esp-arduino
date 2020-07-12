@@ -83,7 +83,7 @@ sml_time *sml_time_parse(sml_buffer *buf) {
 		fprintf(
 			stderr,
 			"libsml: error: sml_time as list[3]: ignoring value[0]=%u value[1]=%d value[2]=%d\n",
-			*t1, *t2, *t3);
+			t1 ? *t1 : 0, t2 ? *t2 : 0, t3 ? *t3 : 0);
 		break;
 	default:
 		goto error;
