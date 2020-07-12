@@ -137,7 +137,17 @@ void sml_buffer_free(sml_buffer *buf) {
 }
 
 int sml_buf_optional_is_skipped(sml_buffer *buf) {
+
+	if (buf->cursor >= buf->buffer_len) {
+		buf->error = 1;
+		return -1;
+	}
+
 	if (sml_buf_get_current_byte(buf) == SML_OPTIONAL_SKIPPED) {
+		if (buf->cursor + 1 > buf->buffer_len) {
+			buf->error = 1;
+			return -1;
+		}
 		sml_buf_update_bytes_read(buf, 1);
 
 		return 1;
