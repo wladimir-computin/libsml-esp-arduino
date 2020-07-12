@@ -118,8 +118,12 @@ sml_get_profile_pack_request *sml_get_profile_pack_request_parse(sml_buffer *buf
 			n = (sml_obj_req_entry_list *)malloc(sizeof(sml_obj_req_entry_list));
 			*n = (sml_obj_req_entry_list){.object_list_entry = NULL, .next = NULL};
 			n->object_list_entry = sml_obj_req_entry_parse(buf);
-			if (sml_buf_has_errors(buf))
+			if (sml_buf_has_errors(buf)) {
+				if (n->object_list_entry)
+					sml_octet_string_free(n->object_list_entry);
+				free(n);
 				goto error;
+			}
 
 			if (msg->object_list == 0) {
 				msg->object_list = n;
