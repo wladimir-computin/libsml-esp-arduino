@@ -100,6 +100,12 @@ void *sml_number_parse(sml_buffer *buf, unsigned char type, int max_size) {
 		return NULL;
 	}
 
+	if ((buf->cursor + 1) > buf->buffer_len) { // at least 1 byte?
+		buf->error = 1;
+		free(np);
+		return NULL;
+	}
+
 	b = sml_buf_get_current_byte(buf);
 	if (type == SML_TYPE_INTEGER && (b & 128)) {
 		negative_int = 1;
