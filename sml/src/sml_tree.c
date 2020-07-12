@@ -37,8 +37,7 @@ sml_tree_path *sml_tree_path_parse(sml_buffer *buf) {
 	sml_tree_path *tree_path = sml_tree_path_init();
 
 	if (sml_buf_get_next_type(buf) != SML_TYPE_LIST) {
-		buf->error = 1;
-		return NULL;
+		goto error;
 	}
 
 	octet_string *s;
