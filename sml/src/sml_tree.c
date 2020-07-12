@@ -228,7 +228,7 @@ sml_proc_par_value *sml_proc_par_value_parse(sml_buffer *buf) {
 	}
 
 	ppv->tag = sml_u8_parse(buf);
-	if (sml_buf_has_errors(buf))
+	if (sml_buf_has_errors(buf) || !(ppv->tag))
 		goto error;
 
 	switch (*(ppv->tag)) {
