@@ -102,7 +102,13 @@ void sml_buf_set_type_and_length(sml_buffer *buf, unsigned int type, unsigned in
 
 int sml_buf_has_errors(sml_buffer *buf) { return buf->error != 0; }
 
-int sml_buf_get_next_type(sml_buffer *buf) { return (buf->buffer[buf->cursor] & SML_TYPE_FIELD); }
+int sml_buf_get_next_type(sml_buffer *buf) {
+	if (buf->cursor >= buf->buffer_len) {
+		buf->error = 1;
+		return 0x100; // invalid type.
+	} else
+		return (buf->buffer[buf->cursor] & SML_TYPE_FIELD);
+}
 
 unsigned char sml_buf_get_current_byte(sml_buffer *buf) { return buf->buffer[buf->cursor]; }
 
