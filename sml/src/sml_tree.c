@@ -37,8 +37,7 @@ sml_tree_path *sml_tree_path_parse(sml_buffer *buf) {
 	sml_tree_path *tree_path = sml_tree_path_init();
 
 	if (sml_buf_get_next_type(buf) != SML_TYPE_LIST) {
-		buf->error = 1;
-		return NULL;
+		goto error;
 	}
 
 	octet_string *s;
@@ -144,8 +143,11 @@ sml_tree *sml_tree_parse(sml_buffer *buf) {
 		int elems;
 		for (elems = sml_buf_get_next_length(buf); elems > 0; elems--) {
 			c = sml_tree_parse(buf);
-			if (sml_buf_has_errors(buf))
+			if (sml_buf_has_errors(buf)) {
+				if (c)
+					sml_tree_free(c);
 				goto error;
+			}
 			if (c) {
 				sml_tree_add_tree(tree, c);
 			}
@@ -229,7 +231,7 @@ sml_proc_par_value *sml_proc_par_value_parse(sml_buffer *buf) {
 	}
 
 	ppv->tag = sml_u8_parse(buf);
-	if (sml_buf_has_errors(buf))
+	if (sml_buf_has_errors(buf) || !(ppv->tag))
 		goto error;
 
 	switch (*(ppv->tag)) {

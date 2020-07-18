@@ -41,6 +41,10 @@ sml_boolean *sml_boolean_parse(sml_buffer *buf) {
 		buf->error = 1;
 		return NULL;
 	}
+	if (buf->cursor >= buf->buffer_len) {
+		buf->error = 1;
+		return NULL;
+	}
 
 	if (sml_buf_get_current_byte(buf)) {
 		sml_buf_update_bytes_read(buf, 1);

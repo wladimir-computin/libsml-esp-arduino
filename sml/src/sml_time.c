@@ -72,18 +72,39 @@ sml_time *sml_time_parse(sml_buffer *buf) {
 		// Ignoring these values, so that parsing does not fail.
 		sml_buf_get_next_length(buf); // should we check the length here?
 		u32 *t1 = sml_u32_parse(buf);
-		if (sml_buf_has_errors(buf))
+		if (sml_buf_has_errors(buf)) {
+			if (t1)
+				sml_number_free(t1);
 			goto error;
+		}
 		i16 *t2 = sml_i16_parse(buf);
-		if (sml_buf_has_errors(buf))
+		if (sml_buf_has_errors(buf)) {
+			if (t1)
+				sml_number_free(t1);
+			if (t2)
+				sml_number_free(t2);
 			goto error;
+		}
 		i16 *t3 = sml_i16_parse(buf);
-		if (sml_buf_has_errors(buf))
+		if (sml_buf_has_errors(buf)) {
+			if (t1)
+				sml_number_free(t1);
+			if (t2)
+				sml_number_free(t2);
+			if (t3)
+				sml_number_free(t3);
 			goto error;
+		}
 		fprintf(
 			stderr,
 			"libsml: error: sml_time as list[3]: ignoring value[0]=%u value[1]=%d value[2]=%d\n",
-			*t1, *t2, *t3);
+			t1 ? *t1 : 0, t2 ? *t2 : 0, t3 ? *t3 : 0);
+		if (t1)
+			sml_number_free(t1);
+		if (t2)
+			sml_number_free(t2);
+		if (t3)
+			sml_number_free(t3);
 		break;
 	default:
 		goto error;

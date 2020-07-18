@@ -66,15 +66,28 @@ sml_message *sml_message_parse(sml_buffer *buf) {
 		goto error;
 
 	len = buf->cursor - msg_start;
+	if ((buf->buffer_len - buf->cursor) < 3) {
+		// libFuzzer ASAN found read out of bound.
+		// at least the 2 bytes for the crc and 1 for the sml_message_end there?
+		buf->error = 1;
+		goto error;
+	}
 
 	msg->crc = sml_u16_parse(buf);
-	if (sml_buf_has_errors(buf) || !(msg->crc))
+	if (sml_buf_has_errors(buf) || !(msg->crc)) {
+		buf->error = 1;
 		goto error;
+	}
 
 	if (*msg->crc != sml_crc16_calculate(&(buf->buffer[msg_start]), len))
 		// Workaround for Holley DTZ541 uses CRC-16/Kermit
 		if (*msg->crc != sml_crc16kermit_calculate(&(buf->buffer[msg_start]), len))
 			goto error;
+
+	if (buf->cursor >= buf->buffer_len) {
+		buf->error = 1;
+		goto error;
+	}
 
 	if (sml_buf_get_current_byte(buf) == SML_MESSAGE_END) {
 		sml_buf_update_bytes_read(buf, 1);
@@ -133,6 +146,11 @@ sml_message_body *sml_message_body_parse(sml_buffer *buf) {
 	sml_message_body *msg_body = (sml_message_body *)malloc(sizeof(sml_message_body));
 	*msg_body = (sml_message_body){.tag = NULL, .data = NULL};
 
+	if ((buf->cursor + 1) > buf->buffer_len) {
+		buf->error = 1;
+		goto error;
+	}
+
 	if (sml_buf_get_next_type(buf) != SML_TYPE_LIST) {
 		buf->error = 1;
 		goto error;
@@ -144,7 +162,7 @@ sml_message_body *sml_message_body_parse(sml_buffer *buf) {
 	}
 
 	msg_body->tag = sml_u32_parse(buf);
-	if (sml_buf_has_errors(buf))
+	if (sml_buf_has_errors(buf) || msg_body->tag == NULL)
 		goto error;
 
 	switch (*(msg_body->tag)) {

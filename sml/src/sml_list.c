@@ -121,6 +121,7 @@ sml_list *sml_list_entry_parse(sml_buffer *buf, struct workarounds *workarounds)
 	static const unsigned char dzg_serial_start[] = {0x0a, 0x01, 'D', 'Z', 'G', 0x00};
 	static const unsigned char dzg_power_name[] = {1, 0, 16, 7, 0, 255};
 	u8 value_tl, value_len_more;
+	sml_list *l = NULL;
 
 	if (sml_buf_get_next_type(buf) != SML_TYPE_LIST) {
 		buf->error = 1;
@@ -131,7 +132,7 @@ sml_list *sml_list_entry_parse(sml_buffer *buf, struct workarounds *workarounds)
 		buf->error = 1;
 		goto error;
 	}
-	sml_list *l = sml_list_init();
+	l = sml_list_init();
 
 	l->obj_name = sml_octet_string_parse(buf);
 	if (sml_buf_has_errors(buf))
@@ -152,6 +153,10 @@ sml_list *sml_list_entry_parse(sml_buffer *buf, struct workarounds *workarounds)
 	l->scaler = sml_i8_parse(buf);
 	if (sml_buf_has_errors(buf))
 		goto error;
+
+	if (buf->cursor >= buf->buffer_len) {
+		goto error;
+	}
 
 	value_tl = sml_buf_get_current_byte(buf);
 	value_len_more = value_tl & (SML_ANOTHER_TL | SML_LENGTH_FIELD);
@@ -202,10 +207,11 @@ sml_list *sml_list_entry_parse(sml_buffer *buf, struct workarounds *workarounds)
 
 	return l;
 
-// This function doesn't free the allocated memory in error cases,
-// this is done in sml_list_parse.
 error:
 	buf->error = 1;
+	if (l) {
+		sml_list_free(l);
+	}
 	return NULL;
 }
 
