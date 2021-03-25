@@ -38,7 +38,7 @@ int UnityMain(int argc, char* argv[], void (*runAllTests)())
     for (r = 0; r < UnityFixture.RepeatCount; r++)
     {
         announceTestRun(r);
-        UnityBegin();
+        UnityBegin("");
         runAllTests();
         UNITY_OUTPUT_CHAR('\n');
         UnityEnd();
